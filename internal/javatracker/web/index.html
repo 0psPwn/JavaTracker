@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JavaTracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="logo-wrap">
+        <div class="logo-mark">JT</div>
+        <div>
+          <div class="logo-title">JavaTracker</div>
+          <div class="logo-subtitle">Java CPG 上下游节点分析</div>
+        </div>
+      </div>
+      <nav class="nav-strip">
+        <span class="nav-item active">CPG Analysis</span>
+        <span class="nav-item">Upload Code</span>
+      </nav>
+    </header>
+
+    <main class="page">
+      <section class="page-card">
+        <section class="toolbar-row">
+          <div class="action-group">
+            <button id="index-btn" class="primary-btn">索引目录</button>
+            <label class="upload-btn">
+              上传项目文件
+              <input id="upload-files-input" type="file" accept=".java,.xml,.gradle,.kts,.properties,.yaml,.yml" multiple>
+            </label>
+            <label class="upload-btn">
+              上传 Maven/源码目录
+              <input id="upload-dir-input" type="file" multiple webkitdirectory>
+            </label>
+            <label class="upload-btn">
+              上传 ZIP 项目包
+              <input id="upload-zip-input" type="file" accept=".zip">
+            </label>
+            <button id="snippet-btn" class="secondary-btn">粘贴源码索引</button>
+          </div>
+          <div class="action-group right">
+            <label class="compact-field path-field">
+              <span>目录路径</span>
+              <input id="root-input" type="text" placeholder="/path/to/java-project">
+            </label>
+          </div>
+        </section>
+
+        <section class="status-strip">
+          <div id="status-box" class="status-box"></div>
+          <div id="upload-box" class="upload-box"></div>
+        </section>
+
+        <section class="snippet-panel" id="snippet-panel">
+          <div class="card-header">
+            <h2>粘贴 Java 源码</h2>
+            <button id="snippet-close-btn" class="text-btn">关闭</button>
+          </div>
+          <div class="snippet-grid">
+            <label class="compact-field">
+              <span>文件名</span>
+              <input id="snippet-file-name" type="text" placeholder="DemoController.java">
+            </label>
+            <label class="compact-field snippet-editor">
+              <span>Java 源码</span>
+              <textarea id="snippet-code" placeholder="public class Demo { ... }"></textarea>
+            </label>
+          </div>
+          <div class="snippet-actions">
+            <button id="snippet-submit-btn" class="primary-btn">保存并索引</button>
+          </div>
+        </section>
+
+        <section class="workspace-grid">
+          <aside class="sidebar-card">
+            <div class="card-header">
+              <h2>节点列表</h2>
+              <span id="result-count" class="mini-pill">0</span>
+            </div>
+            <label class="search-field">
+              <input id="search-input" type="text" placeholder="搜索类 / 方法 / 字段">
+            </label>
+            <div id="search-results" class="result-list"></div>
+          </aside>
+
+          <section class="main-card">
+            <div class="graph-toolbar">
+              <div class="filter-group">
+                <label class="compact-field">
+                  <span>方向</span>
+                  <select id="direction-select">
+                    <option value="both">双向</option>
+                    <option value="upstream">上游</option>
+                    <option value="downstream">下游</option>
+                  </select>
+                </label>
+                <label class="compact-field">
+                  <span>深度</span>
+                  <input id="depth-input" type="number" min="1" max="5" value="2">
+                </label>
+                <label class="compact-field">
+                  <span>节点上限</span>
+                  <input id="limit-input" type="number" min="40" max="400" value="180">
+                </label>
+                <label class="toggle-field">
+                  <input id="body-toggle" type="checkbox" checked>
+                  <span>方法体内部节点</span>
+                </label>
+              </div>
+              <div id="graph-summary" class="summary-group"></div>
+            </div>
+
+            <div class="graph-layout">
+              <div class="graph-board">
+                <div class="graph-board-header">
+                  <div>
+                    <h2>CPG Graph</h2>
+                    <div id="graph-title" class="muted">选择节点开始分析</div>
+                  </div>
+                  <div class="legend">
+                    <span class="legend-chip class">类</span>
+                    <span class="legend-chip method">方法</span>
+                    <span class="legend-chip field">字段</span>
+                    <span class="legend-chip body">方法体</span>
+                  </div>
+                </div>
+                <div class="graph-stage">
+                  <svg id="graph-svg" viewBox="0 0 1400 900" preserveAspectRatio="xMidYMid meet"></svg>
+                  <div id="graph-empty" class="graph-empty">先索引目录、上传 Maven/Java 项目，或粘贴源码，再从左侧选择节点。</div>
+                </div>
+              </div>
+
+              <div class="detail-stack">
+                <section class="detail-card">
+                  <div class="card-header">
+                    <h2>节点详情</h2>
+                  </div>
+                  <div id="detail-box" class="detail-box">
+                    <p class="muted">暂无节点详情</p>
+                  </div>
+                </section>
+
+                <section class="detail-card">
+                  <div class="card-header">
+                    <h2>源码预览</h2>
+                    <span id="source-path" class="source-path"></span>
+                  </div>
+                  <pre id="source-view" class="source-view"></pre>
+                </section>
+              </div>
+            </div>
+          </section>
+        </section>
+      </section>
+    </main>
+
+    <script src="/app.js"></script>
+  </div>
+</body>
+</html>
