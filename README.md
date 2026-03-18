@@ -8,7 +8,7 @@ JavaTracker 是一套 JAVA CPG 上下游节点分析可视化工具：
 
 - 提供更清晰、更友好的图谱与源码联动界面
 
-  ![](images\display.png)
+  ![](https://github.com/0psPwn/JavaTracker/blob/main/images/display.png?raw=true)
 
 ## 快速开始
 
